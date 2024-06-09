@@ -1,5 +1,3 @@
-Sure, here's the content formatted for easy copying and pasting into a GitHub README file:
-
 ---
 
 # README: Assignment 2
