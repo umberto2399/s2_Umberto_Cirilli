@@ -3,13 +3,20 @@ from dash import dcc, html, Input, Output, State
 import dash_table
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 import openai
+from sklearn.preprocessing import MinMaxScaler
 
 # Load the cleaned data
 df = pd.read_csv('final_preprocessed_breakfast_products_with_health_score.csv')
 
+# Min-Max Normalization
+scaler = MinMaxScaler()
+df[['sugars_value', 'fat_value', 'energy-kcal_value', 'fiber_value', 'proteins_value', 'salt_value']] = scaler.fit_transform(
+    df[['sugars_value', 'fat_value', 'energy-kcal_value', 'fiber_value', 'proteins_value', 'salt_value']])
+
 # Initialize the OpenAI API
-client = openai.OpenAI(api_key='INSERT YOU OPENAI API KEY HERE')
+client = openai.OpenAI(api_key='')
 
 # Initialize the Dash app
 app = dash.Dash(__name__)
@@ -48,6 +55,9 @@ app.layout = html.Div([
     html.Div([
         dcc.Graph(id='nutritional-scatter')
     ]),
+
+    # Display clicked product information
+    html.Div(id='clicked-product-info', style={'margin-top': '20px'}),
 
     # Introduce query section
     html.H2("Enter Your Query"),
@@ -128,18 +138,28 @@ def update_scatter(selected_macro_category):
     else:
         filtered_df = df
     fig = px.scatter(filtered_df, x='sugars_value', y='fat_value', color='macro_category',
-                     title='Sugar vs Fat Content',
+                     title='Sugar vs Fat Content (Normalized)',
                      hover_data={'product_name_es': True, 'sugars_value': True, 'fat_value': True, 'macro_category': True})
     return fig
 
-# Callback to process user queries and provide recommendations using ChatGPT
+# Combined callback for query processing and plot click events
 @app.callback(
-    Output('query-results', 'children'),
-    [Input('query-button', 'n_clicks')],
+    [Output('query-results', 'children'), Output('clicked-product-info', 'children')],
+    [Input('query-button', 'n_clicks'), Input('nutritional-scatter', 'clickData')],
     [State('user-query', 'value')]
 )
-def process_query(n_clicks, user_query):
-    if n_clicks and user_query:
+def handle_query_and_click(n_clicks, clickData, user_query):
+    ctx = dash.callback_context
+
+    query_results = "Submit a query or click on a point in the scatter plot to see details."
+    clicked_product_info = ""
+
+    if not ctx.triggered:
+        return query_results, clicked_product_info
+
+    trigger_id = ctx.triggered[0]['prop_id'].split('.')[0]
+
+    if trigger_id == 'query-button' and n_clicks and user_query:
         prompt = f"You need to extract the following information from a short text and I will provide to you: macro_category. For the macro_category you can choose only from this values without altering them (do not change the way they are written cause I am going to use them to make a query hence I need exactly those names): milk, muffins, croissants, honey, jam, peanut_butter, fresh_fruit, fruit_juice, hot_drink, yogurt, cereals, cereal_bars. Example: User Input: 'I want cereal with milk for breakfast' Example of Output: ['cereals', 'milk']. As you can see the output must be a list in which you can put all the categories that you detect inside the user input. User Input: '{user_query}'"
         
         response_extraction = client.chat.completions.create(
@@ -182,8 +202,24 @@ def process_query(n_clicks, user_query):
             
             recommendations += f"### Healthiest Options - **{category.capitalize()}**: {response_decision.choices[0].message.content.strip()}\n"
 
-        return recommendations
-    return ""
+        recommendations = recommendations.replace("\n", "<br>")
+        query_results = recommendations
+
+    elif trigger_id == 'nutritional-scatter' and clickData:
+        point = clickData['points'][0]
+        product_name = point['customdata'][0]
+        clicked_product = df[df['product_name_es'] == product_name].iloc[0]
+        clicked_product_info = html.Div([
+            html.H3(f"Product Name: {clicked_product['product_name_es']}"),
+            html.P(f"Sugar Value: {clicked_product['sugars_value']}"),
+            html.P(f"Fat Value: {clicked_product['fat_value']}"),
+            html.P(f"Energy (kcal): {clicked_product['energy-kcal_value']}"),
+            html.P(f"Fiber Value: {clicked_product['fiber_value']}"),
+            html.P(f"Proteins Value: {clicked_product['proteins_value']}"),
+            html.P(f"Salt Value: {clicked_product['salt_value']}")
+        ])
+
+    return query_results, clicked_product_info
 
 # Callback to update product dropdown in single product section based on selected macro category
 @app.callback(
@@ -207,7 +243,12 @@ def update_single_product_graph(selected_product):
         product_data = product_details[['sugars_value', 'fat_value', 'energy-kcal_value', 'fiber_value', 'proteins_value', 'salt_value']]
         product_data = product_data[product_data > 0]
         
-        fig = px.bar(product_data, x=product_data.index, y=product_data.values, title=f'Nutritional Information for {selected_product}')
+        fig = go.Figure(data=go.Scatterpolar(
+            r=product_data.values,
+            theta=product_data.index,
+            fill='toself'
+        ))
+        fig.update_layout(title=f'Nutritional Information for {selected_product}', hovermode='closest')
         return fig
     return {}
 
@@ -279,7 +320,10 @@ def compare_products(n_clicks, product1, product2):
             ]
         )
         
-        return response_comparison.choices[0].message.content.strip()
+        # Formatting the comparison results
+        comparison_results = response_comparison.choices[0].message.content.strip()
+        comparison_results = comparison_results.replace("\n", "<br>")
+        return comparison_results
     return ""
 
 # Callback to update the product comparison graph based on selected products
