@@ -1,92 +1,100 @@
+# Health-Conscious Breakfast Product Dashboard
 
+## Overview
 
----
+The Health-Conscious Breakfast Product Dashboard is a web application designed to help users explore and compare the nutritional values of various breakfast products. The app provides interactive visualizations and the ability to query nutritional information and recommendations using the OpenAI GPT API.
 
-# README: Assignment 2
+[LINK TO THE IMPROVEMENTS][https://drive.google.com/drive/folders/1aXjUMYx8VTlIlIYtPOmRzY9vSETQMPgq?usp=drive_link]
 
-## Name: Umberto Cirilli
+## Features
 
-LINK TO THE RECORDING: 
+1. **Category Filter and Product Table**: Filter breakfast products by category and brand, and display the filtered results in a table.
+2. **Nutritional Analysis and Segmentation**: Visualize the nutritional content of breakfast products in a scatter plot.
+3. **Query Section**: Enter a query to get nutritional recommendations and information based on user preferences.
+4. **Single Product Analysis**: Select a product to view detailed nutritional information in a radar chart.
+5. **Product Comparison**: Compare the nutritional values of two selected products using normalized bar charts.
 
-[Recording Link](https://esade.zoom.us/rec/share/6avIJ3X3x2BUhvrkYsRExT9ucdZAr9hiA8BJQOUoHGOAkbwHoL82a-YHdBUrsFrB.TFmSuj8HeSKLLFdW)  
-Codice d’accesso: CA6@^m!=
+## Files in the Repository
 
-## Description of the app:
+- `final_preprocessed_breakfast_products_with_health_score.csv`: The main dataset containing cleaned and preprocessed nutritional data for breakfast products.
+- `requirements-3.txt`: A list of Python dependencies required to run the app.
+- `app.py`: The main Dash application script.
+- `categories/`: A folder containing individual CSV files for each breakfast product category.
 
-### Health-Conscious Breakfast Product Dashboard
+## Installation and Setup
 
-#### Overview
+1. **Clone the repository**:
+   ```bash
+   git clone <repository_url>
+   cd <repository_directory>
+   ```
 
-The Health-Conscious Breakfast Product Dashboard is a web application designed to help users explore and compare the nutritional values of various breakfast products. This tool aims to assist users in making healthier choices by providing detailed nutritional information and personalised recommendations based on user queries.
+2. **Create a virtual environment**:
+   ```bash
+   python -m venv venv
+   source venv/bin/activate
+   ```
 
-#### Features
+3. **Install the required dependencies**:
+   ```bash
+   pip install -r requirements-3.txt
+   ```
 
-- **Category Filter and Product Table**: Allows users to filter products by macro category and brand, and view the filtered products in a table format.
-- **Nutritional Analysis and Segmentation**: Displays a scatter plot of sugar versus fat content for the selected macro category.
-- **User Queries and Recommendations**: Users can input their queries to get personalised nutritional recommendations using OpenAI's GPT model.
-- **Single Product Analysis**: Provides detailed nutritional information for a selected product.
-- **Product Comparison**: Allows users to compare the nutritional values of two selected products.
+4. **Add your OpenAI API key**:
+   - Open `app.py` and replace `INSERT YOUR OPENAI API KEY HERE` with your actual OpenAI API key.
 
-## Needed Libraries
+5. **Run the app**:
+   ```bash
+   python app.py
+   ```
 
-- Python 3.7+
-- Dash
-- pandas
-- plotly
-- openai
+6. **Access the app**:
+   - Open your web browser and navigate to `http://127.0.0.1:3000`.
 
-## Application Structure and Logic
+## How to Use the App
 
-### Layout
+1. **Category Filter and Product Table**:
+   - Select a macro category from the dropdown menu.
+   - Optionally, select a brand and the number of rows to display.
+   - The filtered products will be displayed in the table below.
 
-The layout of the app is defined using Dash's HTML and core components. It includes headers, dropdowns for filtering, input fields for queries, tables for displaying data, and graphs for visual representation.
+2. **Nutritional Analysis and Segmentation**:
+   - A scatter plot will show the sugar vs. fat content of the products in the selected category.
+   - Click on any point in the scatter plot to view detailed information about the selected product.
 
-### Callbacks
+3. **Query Section**:
+   - Enter a query in the input box (e.g., "I want a low-sugar cereal").
+   - Click the "Submit" button to get recommendations and information based on your query.
 
-Callbacks are used to make the app interactive. They update the app's components in response to user inputs. The key callbacks in this app are:
+4. **Single Product Analysis**:
+   - Select a macro category and a product from the dropdown menus.
+   - A radar chart will display the detailed nutritional information of the selected product.
 
-- **update_brand_options**: Updates the brand dropdown based on the selected macro category.
-- **update_table**: Updates the product table based on the selected category, brand, and number of rows.
-- **update_scatter**: Updates the scatter plot based on the selected macro category.
-- **process_query**: Processes user queries and provides nutritional recommendations using the OpenAI API.
-- **update_product_options_single**: Updates the product dropdown in the single product section based on the selected macro category.
-- **update_single_product_graph**: Updates the graph showing detailed nutritional information for the selected product.
-- **update_brand_options_compare**: Updates the brand dropdowns in the comparison section based on the selected macro category.
-- **update_product1_options_compare**: Updates the first product dropdown in the comparison section based on the selected macro category and brand.
-- **update_product2_options_compare**: Updates the second product dropdown in the comparison section based on the selected macro category and brand.
-- **compare_products**: Compares the selected products and provides a summary of the comparison.
-- **update_comparison_graph**: Updates the graph showing the comparison of the selected products.
+5. **Product Comparison**:
+   - Select a macro category and two products to compare.
+   - Click the "Compare" button to view a normalized bar chart comparing the nutritional values of the selected products.
 
-### API Calls and Logic
+## Adjustments Made According to Feedback
 
-The app uses OpenAI's GPT 4o model to handle user queries and provide recommendations. Here is a breakdown of how the API calls and logic work:
+1. **Normalization of Nutritional Values**:
+   - Implemented Min-Max normalization for nutritional values (sugars, fat, calories, fiber, proteins, and salt) to scale all values to a common range, making direct comparison easier.
 
-#### Processing User Queries:
+2. **Improved Visualization**:
+   - Replaced the single product analysis bar chart with a radar chart to effectively visualize multiple nutritional variables on a common scale.
+   - Updated the product comparison to use normalized bar charts for clearer visual representation of differences in nutritional values.
 
-- When a user submits a query, the `process_query` callback is triggered.
-- The user's query is sent to the OpenAI API with a prompt designed to extract relevant macro categories.
-- The response is parsed to get the list of categories.
-- For each category, the app selects the products with the lowest sugar, fat, and calorie values.
-- These options are sent to the OpenAI API to determine the healthiest product based on the user's query.
-- The API's response is displayed to the user as recommendations.
+3. **Interactive Plot Click Events**:
+   - Added interactivity to the scatter plot by implementing callbacks that respond to plot click events. Detailed information about the clicked product is displayed when a point in the scatter plot is clicked.
 
-#### Single Product Analysis:
+4. **Enhanced Text Formatting for ChatGPT Recommendations**:
+   - Despite attempts to improve the formatting of the ChatGPT-generated text, the output formatting challenge persists. Efforts were made to instruct ChatGPT to return recommendations in a specific format for better readability and structure.
 
-- When a user selects a product, the `update_single_product_graph` callback is triggered.
-- The detailed nutritional information for the selected product is extracted and displayed in a bar chart.
+## Known Issues
 
-#### Product Comparison:
+- **ChatGPT Output Formatting**: The format of the output generated by ChatGPT-4o may not always adhere to the expected structure. This remains a known issue and further improvements are needed to ensure consistent formatting.
 
-- When users select two products to compare, the `compare_products` and `update_comparison_graph` callbacks are triggered.
-- The detailed nutritional information for both products is extracted.
-- The OpenAI API is used to determine which product is healthier based on the comparison.
-- A bar chart is generated to visually compare the nutritional values of the two products.
+## Conclusion
 
-## Tools Used
-
-- **Dash**: For building the interactive web application.
-- **pandas**: For data manipulation and analysis.
-- **plotly**: For creating interactive graphs and plots.
-- **openai**: For generating personalized nutritional recommendations based on user queries.
+The Health-Conscious Breakfast Product Dashboard provides a comprehensive tool for exploring and comparing the nutritional values of breakfast products. The app leverages interactive visualizations and AI-powered recommendations to help users make informed choices about their breakfast options. Further improvements and iterations will continue to enhance the user experience and address any existing challenges.
 
 ---
