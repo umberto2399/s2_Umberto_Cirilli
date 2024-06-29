@@ -4,7 +4,7 @@
 
 The Health-Conscious Breakfast Product Dashboard is a web application designed to help users explore and compare the nutritional values of various breakfast products. The app provides interactive visualizations and the ability to query nutritional information and recommendations using the OpenAI GPT API.
 
-[LINK TO THE IMPROVEMENTS][https://drive.google.com/drive/folders/1aXjUMYx8VTlIlIYtPOmRzY9vSETQMPgq?usp=drive_link]
+[LINK TO THE IMPROVEMENTS](https://drive.google.com/drive/folders/1aXjUMYx8VTlIlIYtPOmRzY9vSETQMPgq?usp=drive_link)
 
 ## Features
 
