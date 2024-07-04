@@ -16,88 +16,99 @@ df[['sugars_value', 'fat_value', 'energy-kcal_value', 'fiber_value', 'proteins_v
     df[['sugars_value', 'fat_value', 'energy-kcal_value', 'fiber_value', 'proteins_value', 'salt_value']])
 
 # Initialize the OpenAI API
-client = openai.OpenAI(api_key='')
+client = openai.OpenAI(api_key='Your API Key Here')
 
 # Initialize the Dash app
 app = dash.Dash(__name__)
 
-# Define the layout
 app.layout = html.Div([
-    html.H1("Health-Conscious Breakfast Product Dashboard"),
-    html.P("Explore and compare the nutritional values of various breakfast products to make healthier choices."),
-
-    # Category Filter and Product Table
-    html.Div([
-        dcc.Dropdown(
-            id='macro-category-dropdown',
-            options=[{'label': cat, 'value': cat} for cat in df['macro_category'].unique()],
-            placeholder='Select a macro category'
-        ),
-        dcc.Dropdown(
-            id='brand-dropdown',
-            placeholder='Select a brand'
-        ),
-        dcc.Dropdown(
-            id='row-dropdown',
-            options=[
-                {'label': '10', 'value': 10},
-                {'label': '25', 'value': 25},
-                {'label': '50', 'value': 50},
-                {'label': 'All', 'value': 'All'}
-            ],
-            value=10,
-            placeholder='Select number of rows to display'
-        ),
-        dash_table.DataTable(id='product-table')
-    ]),
-
-    # Nutritional Analysis and Segmentation
-    html.Div([
-        dcc.Graph(id='nutritional-scatter')
-    ]),
-
-    # Display clicked product information
-    html.Div(id='clicked-product-info', style={'margin-top': '20px'}),
-
-    # Introduce query section
-    html.H2("Enter Your Query"),
-    html.P("Ask for nutritional information or recommendations based on your preferences."),
+    html.H1("Health-Conscious Breakfast Product Dashboard", style={'text-align': 'center'}),
+    html.P("Explore and compare the nutritional values of various breakfast products to make healthier choices.", style={'text-align': 'center'}),
     
-    # Advanced Queries and Recommendations
-    html.Div([
-        dcc.Input(id='user-query', type='text', placeholder='Enter your query...', style={'width': '80%'}),
-        html.Button('Submit', id='query-button'),
-        html.Div(id='query-results')
-    ]),
-
-    # Introduce single product analysis section
-    html.H2("Single Product Analysis"),
-    html.P("Select a macro category and a product to view detailed nutritional information."),
-    
-    dcc.Dropdown(
-        id='macro-category-dropdown-single',
-        options=[{'label': category, 'value': category} for category in df['macro_category'].unique()],
-        placeholder='Select a macro category'
-    ),
-    dcc.Dropdown(id='product-dropdown-single', placeholder='Select a product'),
-    dcc.Graph(id='single-product-graph'),
-
-    # Introduce comparison section
-    html.H2("Compare Two Products"),
-    html.P("Select two products to compare their nutritional values."),
-    
-    dcc.Dropdown(
-        id='macro-category-dropdown-compare',
-        options=[{'label': category, 'value': category} for category in df['macro_category'].unique()],
-        placeholder='Select a macro category'
-    ),
-    dcc.Dropdown(id='brand-dropdown-compare-1', placeholder='Select first brand'),
-    dcc.Dropdown(id='brand-dropdown-compare-2', placeholder='Select second brand'),
-    dcc.Dropdown(id='compare-product-1', placeholder='Select first product'),
-    dcc.Dropdown(id='compare-product-2', placeholder='Select second product'),
-    html.Button('Compare', id='compare-button'),
-    html.Div(id='comparison-results'),
-    dcc.Graph(id='comparison-graph')
+    dcc.Tabs([
+        dcc.Tab(label='Product Table', children=[
+            html.Div([
+                html.Div([
+                    dcc.Dropdown(
+                        id='macro-category-dropdown',
+                        options=[{'label': cat, 'value': cat} for cat in df['macro_category'].unique()],
+                        placeholder='Select a macro category',
+                        style={'margin-bottom': '10px'}
+                    ),
+                    dcc.Dropdown(
+                        id='brand-dropdown',
+                        placeholder='Select a brand',
+                        style={'margin-bottom': '10px'}
+                    ),
+                    dcc.Dropdown(
+                        id='row-dropdown',
+                        options=[
+                            {'label': '10', 'value': 10},
+                            {'label': '25', 'value': 25},
+                            {'label': '50', 'value': 50},
+                            {'label': 'All', 'value': 'All'}
+                        ],
+                        value=10,
+                        placeholder='Select number of rows to display',
+                        style={'margin-bottom': '10px'}
+                    ),
+                    dash_table.DataTable(
+                        id='product-table',
+                        page_size=10,
+                        style_table={'overflowX': 'auto'},
+                        style_header={'backgroundColor': 'rgb(230, 230, 230)', 'fontWeight': 'bold'},
+                        style_cell={'textAlign': 'left', 'minWidth': '150px', 'width': '150px', 'maxWidth': '150px'}
+                    )
+                ], style={'width': '50%', 'display': 'inline-block', 'verticalAlign': 'top'}),
+                html.Div([
+                    dcc.Graph(id='nutritional-scatter')
+                ], style={'width': '50%', 'display': 'inline-block'})
+            ]),
+            html.Div(id='clicked-product-info', style={'margin-top': '20px'})
+        ]),
+        dcc.Tab(label='Query Section', children=[
+            html.Div([
+                html.H2("Enter Your Query", style={'text-align': 'center'}),
+                html.P("Ask for nutritional information or recommendations based on your preferences.", style={'text-align': 'center'}),
+                dcc.Input(id='user-query', type='text', placeholder='Enter your query...', style={'width': '80%', 'margin': '0 auto', 'display': 'block'}),
+                html.Button('Submit', id='query-button', style={'display': 'block', 'margin': '10px auto'}),
+                html.Div(id='query-results', style={'margin-top': '20px'})
+            ])
+        ]),
+        dcc.Tab(label='Single Product Analysis', children=[
+            html.Div([
+                html.H2("Single Product Analysis", style={'text-align': 'center'}),
+                html.P("Select a macro category and a product to view detailed nutritional information.", style={'text-align': 'center'}),
+                dcc.Dropdown(
+                    id='macro-category-dropdown-single',
+                    options=[{'label': category, 'value': category} for category in df['macro_category'].unique()],
+                    placeholder='Select a macro category',
+                    style={'margin': '10px auto', 'width': '80%'}
+                ),
+                dcc.Dropdown(id='product-dropdown-single', placeholder='Select a product', style={'margin': '10px auto', 'width': '80%'}),
+                dcc.Graph(id='single-product-graph')
+            ])
+        ]),
+        dcc.Tab(label='Compare Two Products', children=[
+            html.Div([
+                html.H2("Compare Two Products", style={'text-align': 'center'}),
+                html.P("Select two products to compare their nutritional values.", style={'text-align': 'center'}),
+                dcc.Dropdown(
+                    id='macro-category-dropdown-compare',
+                    options=[{'label': category, 'value': category} for category in df['macro_category'].unique()],
+                    placeholder='Select a macro category',
+                    style={'margin': '10px auto', 'width': '80%'}
+                ),
+                dcc.Dropdown(id='brand-dropdown-compare-1', placeholder='Select first brand', style={'margin': '10px auto', 'width': '80%'}),
+                dcc.Dropdown(id='brand-dropdown-compare-2', placeholder='Select second brand', style={'margin': '10px auto', 'width': '80%'}),
+                dcc.Dropdown(id='compare-product-1', placeholder='Select first product', style={'margin': '10px auto', 'width': '80%'}),
+                dcc.Dropdown(id='compare-product-2', placeholder='Select second product', style={'margin': '10px auto', 'width': '80%'}),
+                html.Button('Compare', id='compare-button', style={'display': 'block', 'margin': '10px auto'}),
+                html.Div(id='comparison-results', style={'margin-top': '20px'}),
+                html.Div(id='comparison-graph')
+            ])
+        ])
+    ])
 ])
 
 # Callback to update brand dropdown based on selected macro category
@@ -200,10 +211,17 @@ def handle_query_and_click(n_clicks, clickData, user_query):
                 ]
             )
             
-            recommendations += f"### Healthiest Options - **{category.capitalize()}**: {response_decision.choices[0].message.content.strip()}\n"
+            response_text = response_decision.choices[0].message.content.strip()
+            # Format the title and motivations
+            title = f"### Healthiest Options - {category.capitalize()}"
+            lines = response_text.split("**Motivations:**")
+            description = lines[0].replace("###", "").strip()
+            motivations = lines[1].strip() if len(lines) > 1 else ""
 
-        recommendations = recommendations.replace("\n", "<br>")
-        query_results = recommendations
+            # Combine parts
+            recommendations += f"{title}\n\n{description}\n\n**Motivations:**\n{motivations}\n\n"
+
+        query_results = dcc.Markdown(recommendations)
 
     elif trigger_id == 'nutritional-scatter' and clickData:
         point = clickData['points'][0]
@@ -322,13 +340,12 @@ def compare_products(n_clicks, product1, product2):
         
         # Formatting the comparison results
         comparison_results = response_comparison.choices[0].message.content.strip()
-        comparison_results = comparison_results.replace("\n", "<br>")
+        comparison_results = dcc.Markdown(comparison_results)
         return comparison_results
     return ""
 
-# Callback to update the product comparison graph based on selected products
 @app.callback(
-    Output('comparison-graph', 'figure'),
+    Output('comparison-graph', 'children'),
     [Input('compare-button', 'n_clicks')],
     [State('compare-product-1', 'value'), State('compare-product-2', 'value')]
 )
@@ -337,20 +354,70 @@ def update_comparison_graph(n_clicks, product1, product2):
         product1_details = df[df['product_name_es'] == product1].iloc[0]
         product2_details = df[df['product_name_es'] == product2].iloc[0]
         
-        product1_data = product1_details[['sugars_value', 'fat_value', 'energy-kcal_value', 'fiber_value', 'proteins_value', 'salt_value']]
-        product2_data = product2_details[['sugars_value', 'fat_value', 'energy-kcal_value', 'fiber_value', 'proteins_value', 'salt_value']]
+        nutritional_values = ['sugars_value', 'fat_value', 'energy-kcal_value', 'fiber_value', 'proteins_value', 'salt_value']
         
-        comparison_data = pd.DataFrame({
-            'Nutritional Value': product1_data.index,
-            product1: product1_data.values,
-            product2: product2_data.values
-        })
+        data = []
+        for nutrient in nutritional_values:
+            product1_value = product1_details[nutrient]
+            product2_value = product2_details[nutrient]
+            lower_value = ''
+            if product1_value < product2_value and product1_value != 0:
+                lower_value = 'Product 1'
+            elif product2_value < product1_value and product2_value != 0:
+                lower_value = 'Product 2'
+            data.append({
+                'Nutritional Value': nutrient,
+                'Product 1': product1_value,
+                'Product 2': product2_value,
+                'Lower Value': lower_value
+            })
         
-        comparison_data = comparison_data.dropna()
+        columns = [
+            {'name': 'Nutritional Value', 'id': 'Nutritional Value'},
+            {'name': product1_details['product_name_es'], 'id': 'Product 1'},
+            {'name': product2_details['product_name_es'], 'id': 'Product 2'},
+            {'name': 'Lower Value', 'id': 'Lower Value', 'hideable': True}
+        ]
         
-        fig = px.bar(comparison_data, x='Nutritional Value', y=[product1, product2], barmode='group', title=f'Comparison of {product1} and {product2}')
-        return fig
-    return {}
+        style_data_conditional = [
+            {
+                'if': {
+                    'filter_query': '{Lower Value} = "Product 1"',
+                    'column_id': 'Product 1'
+                },
+                'backgroundColor': 'green',
+                'color': 'white'
+            },
+            {
+                'if': {
+                    'filter_query': '{Lower Value} = "Product 2"',
+                    'column_id': 'Product 2'
+                },
+                'backgroundColor': 'green',
+                'color': 'white'
+            },
+            {
+                'if': {
+                    'filter_query': '{Lower Value} = ""',
+                },
+                'backgroundColor': 'white',
+                'color': 'black'
+            }
+        ]
+        
+        table = dash_table.DataTable(
+            data=data,
+            columns=columns,
+            style_data_conditional=style_data_conditional,
+            style_cell={'textAlign': 'center'},
+            style_header={
+                'backgroundColor': 'rgb(230, 230, 230)',
+                'fontWeight': 'bold'
+            }
+        )
+        
+        return table
+    return html.Div()
 
 # Run the Dash app
 if __name__ == '__main__':
